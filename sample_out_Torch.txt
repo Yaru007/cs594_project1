@@ -1,0 +1,12 @@
+th> dofile 'train_CRF.lua'
+==> training in progress
+iter fn.val gap time feval.num train_lett_err train_word_err test_lett_err test_word_err
+<optim.lbfgs>   creating recyclable direction/step/history buffers
+0 24.0122 192.5973 3.490 1 50.50 50.50 50.50 50.50
+1 24.0015 192.4616 7.173 2 50.50 50.50 50.50 50.50
+2 22.1144 173.3414 10.898 3 50.50 50.50 50.50 50.50
+3 19.8238 151.3710 14.610 4 50.50 50.50 50.50 50.50
+:
+:
+49 0.1111 1.1111 1111.11 50 50.50 50.50 50.50 50.50
+<optim.lbfgs>   reached max number of iterations
