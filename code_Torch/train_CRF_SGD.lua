@@ -25,6 +25,7 @@ capWord = 100	-- only use the first 100 words. Otherwise it takes too long to tr
 optimState = {
     learningRate = opt.learningRate, -- used if 'lineSearch' is not specified
     maxIter = opt.maxIter,
+    verbose = true		-- print a bit more information from the solver
    }
 optimMethod = sgd	-- use sgd as the optimization solver
 
@@ -76,7 +77,8 @@ local function feval(x)
 	end
 
 	local f = 0
-	
+	word_order = torch.randperm(nWord)      -- Permute the word
+
 	-- evaluate function by enumerating all words
 	for i = 1,nWord do
 	  index = word_order[i]  -- get the index of 
@@ -211,17 +213,8 @@ end
 -- If commented out, then the training/test errors won't be printed/computed.
 optimState.monitor = Monitor
 
+
 -- Really start the optimization
-print('iter fn.val time train_lett_err train_word_err test_lett_err test_word_err')
-local start_time = sys.clock()
-local monitor = optimState.monitor
+print('iter fn.val gap time train_lett_err train_word_err test_lett_err test_word_err')
 
-for nIter = 1, opt.maxIter do
-    -- Permute the word
-    word_order = torch.randperm(nWord)
-	x,fx = optimMethod(feval,parameters,optimState)
-	io.write(string.format("%d %.4f %d ", nIter-1, fx, sys.clock()-start_time  ))
-	if monitor then monitor(x) end
-	print('')
-end
-
+x,fx = optimMethod(feval, parameters, optimState)
