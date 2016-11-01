@@ -25,7 +25,7 @@ capWord = 100	-- only use the first 100 words. Otherwise it takes too long to tr
 optimState = {
     learningRate = opt.learningRate, -- used if 'lineSearch' is not specified
     maxIter = opt.maxIter,
-    verbose = true		-- print a bit more information from the solver
+    verbose = true	
    }
 optimMethod = sgd	-- use sgd as the optimization solver
 
@@ -53,7 +53,7 @@ max_word_len = torch.max(torch.DoubleTensor{wLen:max(), twLen:max()})
 nWord = (#train.wLen)[1]
 tnWord = (#test.wLen)[1]
 if nWord > capWord then nWord = capWord  end
-
+optimState.nWord = nWord
 
 print('==> training in progress with ' .. nWord .. ' words')
 

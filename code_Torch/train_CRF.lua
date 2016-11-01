@@ -2,16 +2,39 @@ require 'nn'
 require 'optim'   
 require 'ClassCRFCriterion'
 require 'LinearCRF'
+require 'SGD'
+require 'SAG_NUS'
+
+cmd = torch.CmdLine()
+cmd:option('-lambda',1e-3,'regularization parameter')
+cmd:option('-optim', 'LBFGS' ,'optimization method')
+cmd:option('-iter',50,'number of maximal iterations')
+cmd:option('-lr',1e-1,'learning rate')
+cmd:option('-b',1,'number of words in gradient update')
+-- parse input params
+params = cmd:parse(arg)
+-- print(params)
+	
+if params.optim == 'sgd' then
+	optimMethod = sgd
+elseif params.optim == 'sag' then
+	optimMethod = sag_nus
+else
+	-- default
+	optimMethod = optim.lbfgs		-- use LBFGS as the optimization solver
+end
+
+-- optimMethod = sgd
+-- optimMethod = sag_nus
+
+local lambda = params.lambda -- 1e-3  -- the lambda value in Eq (4)
 
 torch.manualSeed(1)	-- fix the seed of the random number generator for reproducing the results
 
-local lambda = 1e-3  -- the lambda value in Eq (4)
-
 opt = {}
-opt.maxIter = 50			-- max number of iterations in BFGS
---opt.maxIter = 5
-opt.nCorrection = 10 	-- number of previous gradients used to approximate the Hessian
-opt.learningRate = 1e-1		-- fixed step size used in the line search of BFGS
+opt.maxIter = params.iter			-- max number of iterations in BFGS
+opt.nCorrection = 10 		-- number of previous gradients used to approximate the Hessian
+opt.learningRate = params.lr	-- fixed step size used in the line search of BFGS
 
 -- Specify the filenames of the training and test data
 local train_fname = '../data/train_torch.dat'
@@ -22,30 +45,30 @@ capWord = 100	-- only use the first 100 words. Otherwise it takes too long to tr
 -- capWord = math.huge  
 
 optimState = {
-    learningRate = opt.learningRate, -- used if 'lineSearch' is not specified
-    maxIter = opt.maxIter,
-    nCorrection = opt.nCorrection,
-    verbose = true		-- print a bit more information from the solver
---    lineSearch = optim.lswolfe,  -- if we use this then the function might 
-																		 -- be evaluated multiple times at each iteration
-   }
-optimMethod = optim.lbfgs		-- use LBFGS as the optimization solver
+	learningRate = opt.learningRate, -- used if 'lineSearch' is not specified
+	maxIter = opt.maxIter,
+	nCorrection = opt.nCorrection,
+	verbose = true,			-- print a bit more information from the solver
+	lambda = params.lambda
+	-- lineSearch = optim.lswolfe,  -- if we use this then the function might 
+	-- be evaluated multiple times at each iteration
+}
 
 ----------------------------------------------------------------------
 local train = torch.load(train_fname, 'ascii')
 data = train.data			
-nFea = train.nFea			-- number of features (129)
-nState = train.nState	-- number of possible labels (26)
-label = train.label		-- array recording the label of all letters (1-26)
-wLen = train.wLen			-- array recording the number of letters in each word
+nFea = train.nFea				-- number of features (129)
+nState = train.nState			-- number of possible labels (26)
+label = train.label				-- array recording the label of all letters (1-26)
+wLen = train.wLen				-- array recording the number of letters in each word
 cumwLen = torch.cumsum(wLen)	-- cumulative sum of wLen
 
 local test = torch.load(test_fname, 'ascii')
 tdata = test.data
 assert(nFea == test.nFea)
 assert(nState == test.nState)
-tlabel = test.label		-- array recording the label of all letters (1-26)
-twLen = test.wLen			-- array recording the number of letters in each word
+tlabel = test.label				-- array recording the label of all letters (1-26)
+twLen = test.wLen				-- array recording the number of letters in each word
 tcumwLen = torch.cumsum(twLen)	-- cumulative sum of wLen
 
 -- max #letter throughout all words
@@ -53,19 +76,20 @@ max_word_len = torch.max(torch.DoubleTensor{wLen:max(), twLen:max()})
 
 -- Cap the number of words used for training at capWord
 nWord = (#train.wLen)[1]
-tnWord = (#test.wLen)[1]
 if nWord > capWord then nWord = capWord  end
-
+optimState.nWord = nWord
+optimState.fevalIntervel = math.ceil(nWord/3)	-- compute objective function after the number of updates
+optimState.L = torch.ones(nWord)			-- Lipschitz constant for each training example
+optimState.sampleRecord = torch.zeros(nWord)			-- record of training example if it is sampled before
 
 print('==> training in progress with ' .. nWord .. ' words')
 
 -- Construct the network that represents CRF
 model = nn.Sequential()
 model:add(nn.LinearCRF(nState, nFea, data))
-criterion = nn.ClassCRFCriterion(nState, torch.max(twLen))
+criterion = nn.ClassCRFCriterion(nState, torch.max(wLen))
 parameters,gradParameters = model:getParameters()
 
--- Construct the network that represents CRF for the test set
 tmodel = nn.Sequential()
 tmodel:add(nn.LinearCRF(nState, nFea, tdata))
 tcriterion = nn.ClassCRFCriterion(nState, torch.max(twLen))
@@ -76,33 +100,63 @@ local function feval(x)
 	parameters:copy(x)
 	gradParameters:zero()	
 	local f = 0
-	
+
 	-- evaluate function by enumerating all words
 	for i = 1,nWord do
-	  -- estimate f
-	  first = i > 1 and cumwLen[i-1]+1 or 1	--index of the first letter in the word
-	  last = cumwLen[i]											--index of the last letter in the word
+		-- estimate f
+		first = i > 1 and cumwLen[i-1]+1 or 1	--index of the first letter in the word
+		last = cumwLen[i]											--index of the last letter in the word
 		local input = torch.linspace(first, last, last-first+1)		
 		local output = model:forward(input)
 		local target = label:sub(first, last)
-	  f = f + criterion:forward(output, target)
-	
-	  -- estimate df/dW
-	  local df_do = criterion:backward(output, target)
-	  model:backward(input, df_do)		  
+		f = f + criterion:forward(output, target)
+
+		-- estimate df/dW
+		local df_do = criterion:backward(output, target)
+		model:backward(input, df_do)		  
 	end
-	
+
 	-- normalize gradients and f(X), add regularization
 	gradParameters:div(nWord):add(lambda*x)
 	f = f/nWord + lambda*torch.pow(x:norm(), 2)/2
-	
+
 	-- return f and df/dX
 	return f,gradParameters
 end
 
+-- get gradient and object value of ith word
+local function singleEval(x, idx)
+	parameters:copy(x)
+	gradParameters:zero()	
+
+	-- out of scope
+	if idx < 1 or idx > nWord then
+		return nil
+	end
+    
+	-- evaluate function by enumerating all words
+		-- estimate f
+	first = idx > 1 and cumwLen[idx-1]+1 or 1	--index of the first letter in the word
+	last = cumwLen[idx]											--index of the last letter in the word
+	local input = torch.linspace(first, last, last-first+1)	
+	local output = model:forward(input)
+	local target = label:sub(first, last)
+	local f = criterion:forward(output, target)
+
+	-- estimate df/dW
+	local df_do = criterion:backward(output, target)
+	model:backward(input, df_do)		
+
+	-- gradients and f(X), add regularization
+	gradParameters:add(lambda*x)
+	f = f + lambda*torch.pow(x:norm(), 2)/2
+
+	-- return df/dX
+	return f, gradParameters
+end
+
 -- set model to training mode (for modules that differ in training and testing, like Dropout)
 model:training()
-
 
 --- Allocate some persistent memory for MAP inference
 --- Functions dp_argmax and find_MAP are for MAP inference
@@ -115,7 +169,7 @@ local function dp_argmax(i, nodePot, edgePot)
 	else
 		res = dp_argmax(i-1, nodePot, edgePot)
 		res, argmax[i] = torch.max(edgePot + torch.repeatTensor(res:resize(nState,1), 1, nState), 1)	 	  	
-	 	res:add(nodePot[i])	 	  	
+		res:add(nodePot[i])	 	  	
 	end
 	return res
 end
@@ -126,7 +180,7 @@ local function find_MAP(nodePot, edgePot)
 	max_val, labels[nLetter] = torch.max(dp_argmax(nLetter, nodePot, edgePot), 2)
 	for i=nLetter-1,1,-1 do
 		labels[i] = argmax[i+1][labels[i+1]]
-  end
+	end
 	return labels:sub(1,nLetter)
 end
 
@@ -138,9 +192,6 @@ end
 --   See the online tutorial for computing the test error:
 --    https://web.archive.org/web/20151116000833/http://code.madbits.com/wiki/doku.php?id=tutorial_supervised_5_test
 local function Monitor(x)
-
-	te_word_err = -1		-- dummy, to be set by your code
-	te_let_err = -1			-- dummy, to be set by your code
 
 	local lError = 0
 	local wError = 0
@@ -169,10 +220,12 @@ local function Monitor(x)
 	tr_word_err = wError * 100.0 / nWord
 	tr_let_err = lError * 100.0 / cumwLen[nWord]
 
---  Estimate the test error
-
+	--[[
+	Your code to compute the test errors
+	--]]
 	local tlError = 0
 	local twError = 0
+	local tnWord = (#test.wLen)[1]
 
 	tparameters:copy(x)
 	for i = 1,tnWord do  -- loop over testing words	  
@@ -203,12 +256,67 @@ local function Monitor(x)
 	io.write(string.format("%.2f %.2f %.2f %.2f", tr_let_err, tr_word_err, te_let_err, te_word_err))
 end
 
+-- sample one training example uniformly and return its f and gradient
+local function uniformSample(x)
+	idx = math.random(nWord)
+	-- print('sample ', idx)
+	return idx, singleEval(x, idx)
+end
+
+local function Llinesearch(x,idx,Li,fi,gi)
+     x_p = x:add(-1/Li, gi)
+     f_p,g_p = singleEval(x_p,idx)
+     f_p = f_p - lambda*torch.pow(x_p:norm(), 2)/2
+	 g_p:add(-lambda*x_p)
+     while f_p >= (fi - 1/2/Li*torch.pow(gi:norm(), 2)) do
+     	   Li = 2*Li
+     	   x_p = x:add(-1/Li, gi)
+           f_p,g_p = singleEval(x_p,idx)
+           f_p = f_p - lambda*torch.pow(x_p:norm(), 2)/2
+	       g_p:add(-lambda*x_p)
+     end
+     return Li
+end
+
+-- input x: w in CRF problem
+--		 L: Lipschitz constant for each training example
+local function nonUniformSample(x, L)
+	randi = math.random()
+	-- first time or half probability
+	if L:sum() == L:size(1) or randi > 0.5 then
+		rand_idx = math.random(nWord)
+	else
+		-- get the mean of L
+		p = torch.div(L, L:sum())
+		--print("new p", p)
+		-- sample by weight
+		rand_idx = torch.multinomial(p,1,true)[1]
+		--print(rand_idx)
+	end
+	fi, gi = singleEval(x, rand_idx)
+
+	fi = fi - lambda*torch.pow(x:norm(), 2)/2
+	gi:add(-lambda*x)
+	--if torch.pow(gi:norm(),2) > 1e-8 then
+		--L[idx] = lineSearch(x,idx,L[idx],fi)
+	--end
+	return rand_idx, fi, gi
+end
+
 -- Set the monitor for the solver.
 -- If commented out, then the training/test errors won't be printed/computed.
 optimState.monitor = Monitor
+if params.optim == 'sgd' then
+	optimState.sampler = uniformSample
+end
+
+if params.optim == 'sag' then
+	optimState.sampler = nonUniformSample
+	optimState.lineSearch = Llinesearch
+end
 
 -- Really start the optimization
-print('iter fn.val gap time feval.num train_lett_err train_word_err test_lett_err test_word_err')
-x,fx = optimMethod(feval, parameters, optimState)
+ print('iter fn.val gap time feval.num train_lett_err train_word_err test_lett_err test_word_err')
+ x,fx = optimMethod(feval, parameters, optimState)
 
 -- for i=1,#fx do print(i,fx[i]); end	-- secrete
