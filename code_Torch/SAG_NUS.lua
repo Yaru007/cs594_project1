@@ -90,7 +90,7 @@ function sag_nus(opfunc, x, config, state)
 	local d = g.new(g:size()):zero()		-- sum of gradients, initialized zero
     local m = 0
 
-	while nIter < maxIter and m < nWord do
+	while nIter < maxIter do
 		
 		if fmod(state.updateCount, fevalIntervel) == 0 then
 			f_old = fx or 0
@@ -112,38 +112,36 @@ function sag_nus(opfunc, x, config, state)
 		    end
 		end
 
-		i,fi,gi = sample(x,L)
+		rand_idx,fi,gi = sample(x,L)
 
-		Lmean = torch.mean(L)
-		Lmax = torch.max(L)
-		
-		-- if ith example has been sampled before
-		--print (state.sampleRecord)
-        
-		if sampleRecord[i] == 1 then
-			L[i] = 0.9*L[i]
-		else
-			sampleRecord[i] = 1
-			m = m + 1
-			L[i] = 0.5*Lmean
-		end
-
-		d = d - gi + g_old[i]
-		g_old[i]:copy(gi)
+        -- update the d
+		d = d - gi + g_old[rand_idx]
+		g_old[rand_idx]:copy(gi)
 
 		if torch.pow(gi:norm(),2) > 1e-8 then
-			L[i] = lineSearch(x,i,L[i],fi,gi)
+			L[rand_idx] = lineSearch(x,rand_idx,L[rand_idx],fi,gi)
 		end
 
+		Lmax = torch.max(L)
+		Lmean = torch.mean(L)
 
-
+        if sampleRecord[rand_idx] == 0 then
+			m = m + 1
+		end
 		-- alpha, w, (L) update
-		alpha = 1/2*(1/L[i] + torch.mean(L))
+		alpha = (1/Lmax + Lmean)/2
 		x = (1-alpha*lambda)*x - alpha/m*d
         --L[i] = L[i]*torch.pow(2,-1/nWord)
         state.updateCount = state.updateCount + 1
 		--print('done update the L!' , state.updateCount)
 
+
+		if sampleRecord[rand_idx] == 1 then
+			L[rand_idx] = 0.9*L[rand_idx]
+		else
+			sampleRecord[rand_idx] = 1
+			L[rand_idx] = 0.5*Lmean
+		end
 		------------------------------------------------------------
 		-- check conditions
 		------------------------------------------------------------
@@ -159,10 +157,10 @@ function sag_nus(opfunc, x, config, state)
 			break
 		end
 
-		--if sampleRecord:sum() == sampleRecord:size(1) then
-		--	verbose('all the training examples are sampled')
-		--	break
-		--end
+		if sampleRecord:sum() == sampleRecord:size(1) then
+		   verbose('all the training examples are sampled')
+		   break
+		end
 
 
 	end
