@@ -37,7 +37,7 @@ function LinearCRF:updateOutput(input)
 	local nState = self.nState
 	local nFea = self.nFea
 	
-    local wNode = self.weight:sub(1, nFea)
+  local wNode = self.weight:sub(1, nFea)
 	local wEdge = self.weight:sub(nFea+1, nFea+nState)
 
 	local nLetter = (#input)[1]
@@ -58,6 +58,7 @@ end
 
 
 -- Compute the gradient with respect to the weights in this layer
+-- Inputs:
 -- 	input: is an array specifying the letter id (same as LinearCRF:updateOutput)
 -- 	gradOutput: the gradient given by ClassCRFCriterion:updateGradInput
 --   		It is a table {gNode, gEdge}  with two parts:
@@ -68,35 +69,34 @@ end
 --   It is the vectorization of the concatenation of two matrices
 --   One is sized #letter-by-nState, and the other is nState-by-nState
 function LinearCRF:accGradParameters(input, gradOutput)
--- gradient of logp respect to T
+  
+  --[[
+  	Your implementation here
+  --]]
+  local gNode = gradOutput.gNode
+	local nState = self.nState
+	local nFea = self.nFea
+	local nLetter = (#input)[1]
+	local outgNode = torch.zeros(nFea, nState) --self.gradWeight:sub(1, nFea)	-- you may pre-allocate persistent space for it
 
-   local C_train = gradOutput.gNode
-   local T_train = gradOutput.gEdge
+	for i = 1,nLetter do
+		x = self.data[input[i]][2];
+		-- ith row of g
+		g = gNode[i]
+		-- get the data of ith letter
+		for j = 1, x[1]:size(1) do
+			idx = x[1][j]
+			val = x[2][j]
+			for k = 1,self.nState do
+				outgNode[idx][k] = outgNode[idx][k] + g[k]*val
+			end
+		end
+	end
 
-
--- gradient of logp respect to w in (13)
-   local nLetter = (#input)[1]
-   local nFea = self.nFea
-   local nState = self.nState
-
-   local G_train = torch.zeros(nFea,nState)
-
-   for j = 1, nState do
-       for k = 1, nLetter do
-           local x = self.data[input[k]][2]
-           for i = 1, x[1]:size(1) do
-               ind = x[1][i]
-               val = x[2][i]
-               G_train[ind][j] = G_train[ind][j] + val*C_train[k][j]
-           end
-       end
-   end
-
-
-
--- gradient of logp respect to T is the T_train
-   self.gradWeight:sub(1,nFea):add(G_train)
-   self.gradWeight:sub(nFea+1,nFea+nState):add(T_train)
+	-- accumulate the gradient
+	self.gradWeight:sub(1, nFea):add(outgNode)
+	self.gradWeight:sub(nFea+1, nFea+nState):add(gradOutput.gEdge)
+  
 end
 
 

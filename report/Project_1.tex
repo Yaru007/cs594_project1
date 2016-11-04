@@ -81,7 +81,13 @@ Hint: the solver is quasi-Newton (like LBFGS).
 
 Figure \ref{fig:compare_cpuTime} gives the test error curve with different $\lambda$. From the plots we can tell a larger $\lambda$ makes the optimization converge faster. 
 
-The reason for such phenomenon is that as the $\lambda$ increases, more penalization is put on the $l_2$ norm of $\boldsymbol{w}$ and $\boldsymbol{T}$, which means more restrictions regarding on the summation on the parameters. As the domain area for potential parameter estimation will be smaller, and the converging time will be shorter compared with the larger $\lambda$. 
+Consider that the objective function is 
+\begin{align}
+\label{eq:obj_MLE}
+   \ -\frac{1}{n}\sum_{t=1}^n \log p(\yvec^t | X^t) + \frac{\lambda}{2} \rbr{\sum_{k \in \Ycal} \nbr{\wvec_k}^2 + \frac{1}{2} \sum_{ij} T^2_{ij}}.
+\end{align} 
+and the solver is quasi-Newton, which means the $\lambda$ is kept in the second-order gradient.
+As the $\lambda$ increases, more penalization is put on the $l_2$ norm of $\boldsymbol{w}$ and $\boldsymbol{T}$, and  more restrictions regarding on the summation on the parameters. As the domain area for potential parameter estimation will be smaller, and the converging time will be shorter compared with the larger $\lambda$. 
 
 \begin{figure}[t]
 \centering
@@ -232,7 +238,7 @@ iter fn.val gap time feval.num train_lett_err train_word_err test_lett_err test_
 10 9.2492 59.7605 289.435 11 24.02 75.00 41.95 94.13
 :
 :
-49 0.7562 1.6087 1334.443 50 0.00 0.00 36.74 87.15
+49 0.7562 1.6087 1413.176 50 0.00 0.00 36.74 87.15
 <optim.lbfgs> 	reached max number of iterations
 \end{verbatim}
 
@@ -264,27 +270,47 @@ So you may compute the value every 1000 updates (or pick a frequency that you fe
 The training set is again the first 100 words,
 and SGD/SAG-NUS randomly picks one out of them at each step.
 
-
 \begin{figure}[t]
 \centering
 \subfigure[$\lambda =$ {\sf 1e-2}]{
-\includegraphics[width=5cm]{obj_Torch}}
+\includegraphics[width=5cm]{t2_1e-2}}
 ~~
 \subfigure[$\lambda =$ {\sf 1e-4}]{
-\includegraphics[width=5cm]{obj_Torch}}
+\includegraphics[width=5cm]{t2_1e-4}}
 ~~
 \subfigure[$\lambda =$ {\sf 1e-6}]{
-\includegraphics[width=5cm]{obj_Torch}}
+\includegraphics[width=5cm]{t2_1e-6}}
 \caption{Comparison of LBFGS, SGD, and SAG-NUS over $\lambda \in \{${\sf 1e-2, 1e-4, 1e-6}\}.}
 \label{fig:compare_sgd}
 \end{figure}
 
+%\begin{figure}[t]
+%\centering
+%\subfigure[$\lambda =$ {\sf 1e-2}]{
+%\includegraphics[width=5cm]{t2_1e-2_closer}}
+%~~
+%\subfigure[$\lambda =$ {\sf 1e-4}]{
+%\includegraphics[width=5cm]{t2_1e-4_closer}}
+%~~
+%\subfigure[$\lambda =$ {\sf 1e-6}]{
+%\includegraphics[width=5cm]{t2_1e-6_closer}}
+%\caption{Closer look of comparison of LBFGS, SGD, and SAG-NUS over $\lambda \in \{${\sf 1e-2, 1e-4, 1e-6}\}.}
+%\label{fig:compare_sgd_closer}
+%\end{figure}
+
 {\bf Solution T2.}
+
+We compute the objective value after every 1000 updates. From the plots we can see that generally SGD converges faster than LBFGS and a lager $\lambda$ results in faster convergence. When the $\lambda = {\sf 1e-2}$, the solution still has some fluctuation after convergence. For the SAG-NUS method, it can been seen that it performs the worst in general among these three methods. And there is always a spike after the first 100 updates. Furthermore, the convergence status of it is greatly associated with the value of $\lambda$. More specifically, as $\lambda$ goes larger, it becomes harder for SAG-NUS to reach convergence. After checking the step size calculated based on the $L_g$ in SAG-NUS, we noticed that the step size is first around 0.9 then drop to 0.5 during the updates. This step size is much larger compared with the 0.1 we choose for the SGD method. Therefore, the first several iteration might drive the $w$ to far away from the truth due to the large step size, and the large $\lambda$ can also make the things get worse according to the update function. 
+
+
 
 {\bf Question T3.}
 What is your general experience of tuning the parameters of the solvers in {\bf Question T2}?
 You do not need to be exhaustive, and just briefly describe what you tried and what you found.
+
 {\bf Solution T3.}
+We have tried different step size, and as we expected, the solution converges slower with a smaller step size.
+We also tried to evaluate the objective function and error every 5, 30 and 100 updates of SGD/SAG-NUS, more frequent computation shows more fluctuation of object value, this also makes sense because of the randomness by sampling.
 
 {\bf Question T4.}
 The advantage of stochastic optimization lies in the low cost per step.
@@ -299,10 +325,14 @@ Re-produce Figure \ref{fig:word_err} (word-wise error) but do \emph{not} include
 Instead, include the test error of LBFGS, SGD, and SAG-NUS.
 Now it should look like Figure \ref{fig:compare_word_err}.
 
-\begin{figure}[t] 
+\begin{figure}[t]
 \centering
-\includegraphics[width=5cm]{error_Torch}
-\caption{Comparison of word-wise error on the test data for $\lambda=$???.}
+\subfigure[Letter-wise error]{
+\includegraphics[width=5cm]{t2_1e-2}}
+~~
+\subfigure[Word-wise error]{
+\includegraphics[width=5cm]{t2_1e-4}}
+\caption{Comparison of testing error on the test data for $\lambda=1e-4$.}
 \label{fig:compare_word_err}
 \end{figure}
 
@@ -317,46 +347,10 @@ Again for stochastic methods, the error can be computed every, say, 1000 steps.
 
 What conclusions can be drawn from the plot?
 
-{\bf Solution T4.}
-
 {\bf Extra credit.}
 You may also plot a similar figure for the test letter-wise error, and that will earn you extra 10 points out of 100.
 
-
-
-\iffalse
-
-memo
-
-\begin{verbatim}
-x = torch.ones(3,3)
-y = x:sub(1,2)
-y = torch.zeros(2,3)
-
-th> y
- 0  0  0
- 0  0  0
-[torch.DoubleTensor of size 2x3]
-
-th> x
- 1  1  1
- 1  1  1
- 1  1  1
-[torch.DoubleTensor of size 3x3]
-\end{verbatim}
-
-read the first 53 lines of \verb!torch/pkg/optim/lbfgs.lua! to understand the parameters for lbfgs.
-
-
-The return values of require, e.g. \verb!require "nn"!, are cached so a file is run at most once,
-even when require'd many times.
-So if you edit the module and rerun the code that uses this module via "require",
-your changes won't be picked up.
-You may quit torch and restart it to re-load the module.
-You may ``unrequire" by \url{http://lua-users.org/lists/lua-l/2009-03/msg00587.html}
-
-\newpage
-\fi
+{\bf Solution T4.}
 
 
 \end{document}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  30 OCT 2016 11:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  3 NOV 2016 20:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -526,141 +526,151 @@ LaTeX Font Info:    Font shape `U/lasy/b/n' in size <6> not available
 File: ./Figures/p2_1e-2.pdf Graphic file (type pdf)
 
 <use ./Figures/p2_1e-2.pdf>
-Package pdftex.def Info: ./Figures/p2_1e-2.pdf used on input line 89.
+Package pdftex.def Info: ./Figures/p2_1e-2.pdf used on input line 95.
 (pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <9> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 89.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 95.
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <5> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 89.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 95.
 
 <./Figures/p2_1e-4.pdf, id=27, 794.97pt x 614.295pt>
 File: ./Figures/p2_1e-4.pdf Graphic file (type pdf)
 
 <use ./Figures/p2_1e-4.pdf>
-Package pdftex.def Info: ./Figures/p2_1e-4.pdf used on input line 92.
+Package pdftex.def Info: ./Figures/p2_1e-4.pdf used on input line 98.
 (pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
 File: ./Figures/p2_1e-4.pdf Graphic file (type pdf)
  <use ./Figures/p2_1e-4.pdf>
-Package pdftex.def Info: ./Figures/p2_1e-4.pdf used on input line 95.
+Package pdftex.def Info: ./Figures/p2_1e-4.pdf used on input line 101.
 (pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <7> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 96.
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 96.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 102.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 102.
+
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 96.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 102.
 
 <./Figures/p3_letter_err.pdf, id=31, 794.97pt x 614.295pt>
 File: ./Figures/p3_letter_err.pdf Graphic file (type pdf)
 
 <use ./Figures/p3_letter_err.pdf>
-Package pdftex.def Info: ./Figures/p3_letter_err.pdf used on input line 119.
+Package pdftex.def Info: ./Figures/p3_letter_err.pdf used on input line 125.
 (pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
 
 <./Figures/p3_word_err.pdf, id=32, 794.97pt x 614.295pt>
 File: ./Figures/p3_word_err.pdf Graphic file (type pdf)
 
 <use ./Figures/p3_word_err.pdf>
-Package pdftex.def Info: ./Figures/p3_word_err.pdf used on input line 126.
+Package pdftex.def Info: ./Figures/p3_word_err.pdf used on input line 132.
 (pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
  [2 <./Figures/p2_1e-2.pdf, page is rotated 90 degrees> <./Figures/p2_1e-4.pdf,
- page is rotated 90 degrees> <./Figures/p3_letter_err.pdf, page is rotated 90 d
-egrees> <./Figures/p3_word_err.pdf, page is rotated 90 degrees>] <./Figures/p4_
-scalability.pdf, id=64, 794.97pt x 614.295pt>
+ page is rotated 90 degrees>]
+<./Figures/p4_scalability.pdf, id=61, 794.97pt x 614.295pt>
 File: ./Figures/p4_scalability.pdf Graphic file (type pdf)
 
 <use ./Figures/p4_scalability.pdf>
-Package pdftex.def Info: ./Figures/p4_scalability.pdf used on input line 158.
+Package pdftex.def Info: ./Figures/p4_scalability.pdf used on input line 164.
 (pdftex.def)             Requested size: 165.02606pt x 127.51538pt.
- [3 <./Figures/p4_scalability.pdf, page is rotated 90 degrees>] <./Figures/p5_L
-BFGS.pdf, id=76, 794.97pt x 614.295pt>
+ [3 <./Figures/p3_letter_err.pdf, page is rotated 90 degrees> <./Figures/p3_wor
+d_err.pdf, page is rotated 90 degrees> <./Figures/p4_scalability.pdf, page is r
+otated 90 degrees>]
+<./Figures/p5_LBFGS.pdf, id=78, 794.97pt x 614.295pt>
 File: ./Figures/p5_LBFGS.pdf Graphic file (type pdf)
 
 <use ./Figures/p5_LBFGS.pdf>
-Package pdftex.def Info: ./Figures/p5_LBFGS.pdf used on input line 186.
+Package pdftex.def Info: ./Figures/p5_LBFGS.pdf used on input line 192.
 (pdftex.def)             Requested size: 165.02606pt x 127.51538pt.
 
-Overfull \hbox (36.12953pt too wide) in paragraph at lines 237--237
+Overfull \hbox (36.12953pt too wide) in paragraph at lines 243--243
 []\OT1/cmtt/m/n/10.95 iter fn.val gap time feval.num train_lett_err train_word_
 err test_lett_err test_word_err[] 
  []
 
 [4 <./Figures/p5_LBFGS.pdf, page is rotated 90 degrees>]
-Overfull \hbox (8.17996pt too wide) in paragraph at lines 244--249
+Overfull \hbox (8.17996pt too wide) in paragraph at lines 250--255
 \OT1/cmr/m/n/10.95 talk and Mat-lab code (for ref-er-ence) can be found at []\O
 T1/cmtt/m/n/10.95 http://www.cs.ubc.ca/~schmidtm/Documents\OT1/cmr/m/n/10.95 . 
 
  []
 
-<./Figures/obj_Torch.pdf, id=86, 248.24846pt x 230.4339pt>
-File: ./Figures/obj_Torch.pdf Graphic file (type pdf)
+<./Figures/t2_1e-2.pdf, id=88, 794.97pt x 614.295pt>
+File: ./Figures/t2_1e-2.pdf Graphic file (type pdf)
 
-<use ./Figures/obj_Torch.pdf>
-Package pdftex.def Info: ./Figures/obj_Torch.pdf used on input line 271.
-(pdftex.def)             Requested size: 142.26378pt x 132.05893pt.
-File: ./Figures/obj_Torch.pdf Graphic file (type pdf)
- <use ./Figures/obj_Torch.pdf>
-Package pdftex.def Info: ./Figures/obj_Torch.pdf used on input line 274.
-(pdftex.def)             Requested size: 142.26378pt x 132.05893pt.
-File: ./Figures/obj_Torch.pdf Graphic file (type pdf)
+<use ./Figures/t2_1e-2.pdf>
+Package pdftex.def Info: ./Figures/t2_1e-2.pdf used on input line 276.
+(pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
 
-<use ./Figures/obj_Torch.pdf>
-Package pdftex.def Info: ./Figures/obj_Torch.pdf used on input line 277.
-(pdftex.def)             Requested size: 142.26378pt x 132.05893pt.
- [5 <./Figures/obj_Torch.pdf, page is rotated 90 degrees>] <./Figures/error_Tor
-ch.pdf, id=109, 245.94987pt x 225.26157pt>
-File: ./Figures/error_Torch.pdf Graphic file (type pdf)
+<./Figures/t2_1e-4.pdf, id=89, 794.97pt x 614.295pt>
+File: ./Figures/t2_1e-4.pdf Graphic file (type pdf)
 
-<use ./Figures/error_Torch.pdf>
-Package pdftex.def Info: ./Figures/error_Torch.pdf used on input line 304.
-(pdftex.def)             Requested size: 142.26378pt x 130.3012pt.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 362.
- [6 <./Figures/error_Torch.pdf, page is rotated 90 degrees>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 362.
+<use ./Figures/t2_1e-4.pdf>
+Package pdftex.def Info: ./Figures/t2_1e-4.pdf used on input line 279.
+(pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
+
+<./Figures/t2_1e-6.pdf, id=90, 794.97pt x 614.295pt>
+File: ./Figures/t2_1e-6.pdf Graphic file (type pdf)
+
+<use ./Figures/t2_1e-6.pdf>
+Package pdftex.def Info: ./Figures/t2_1e-6.pdf used on input line 282.
+(pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
+ [5]
+File: ./Figures/t2_1e-2.pdf Graphic file (type pdf)
+ <use ./Figures/t2_1e-2.pdf>
+Package pdftex.def Info: ./Figures/t2_1e-2.pdf used on input line 331.
+(pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
+File: ./Figures/t2_1e-4.pdf Graphic file (type pdf)
+
+<use ./Figures/t2_1e-4.pdf>
+Package pdftex.def Info: ./Figures/t2_1e-4.pdf used on input line 334.
+(pdftex.def)             Requested size: 142.26378pt x 109.93094pt.
+ [6 <./Figures/t2_1e-2.pdf, page is rotated 90 degrees> <./Figures/t2_1e-4.pdf,
+ page is rotated 90 degrees> <./Figures/t2_1e-6.pdf, page is rotated 90 degrees
+>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 356.
+ [7]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 356.
  (./Project_1.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 362.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 362.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 356.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 356.
 Package rerunfilecheck Info: File `Project_1.out' has not changed.
 (rerunfilecheck)             Checksum: 99BC4290082E3DEDF90FE60447A619BF;144.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 362.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 356.
  ) 
 Here is how much of TeX's memory you used:
- 9398 strings out of 493117
- 128200 string characters out of 6135433
- 237681 words of memory out of 5000000
- 12662 multiletter control sequences out of 15000+600000
- 23467 words of font info for 94 fonts, out of 8000000 for 9000
+ 9413 strings out of 493117
+ 128407 string characters out of 6135433
+ 239751 words of memory out of 5000000
+ 12671 multiletter control sequences out of 15000+600000
+ 24667 words of font info for 98 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,12n,30p,586b,445s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,11n,30p,1109b,445s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></
-usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></u
-sr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr
-/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/l
-ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/l
-ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/loc
-al/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local
-/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/te
-xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texli
-ve/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></usr/local/texliv
-e/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive
-/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr/local/texlive/2
-014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/20
-14/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2014
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2014/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on Project_1.pdf (6 pages, 377371 bytes).
+usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></u
+sr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
+r/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/
+local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/lo
+cal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/lo
+cal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/loca
+l/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/
+texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/tex
+live/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texliv
+e/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></usr/local/texlive
+/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive/
+2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr/local/texlive/20
+14/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/201
+4/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2014/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2014/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on Project_1.pdf (7 pages, 247022 bytes).
 PDF statistics:
- 198 PDF objects out of 1000 (max. 8388607)
- 151 compressed objects within 2 object streams
- 22 named destinations out of 1000 (max. 500000)
- 57 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 194 PDF objects out of 1000 (max. 8388607)
+ 155 compressed objects within 2 object streams
+ 26 named destinations out of 1000 (max. 500000)
+ 62 words of extra memory for PDF output out of 10000 (max. 10000000)
 

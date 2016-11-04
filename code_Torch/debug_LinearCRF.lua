@@ -6,7 +6,6 @@ require 'LinearCRF'
 
 torch.manualSeed(1)
 
-
 local train = torch.load('../data/debug_torch.dat','ascii')
 
 data = train.data
@@ -17,7 +16,6 @@ model = nn.Sequential()
 model:add(nn.LinearCRF(nState, nFea, data))
 
 parameters,gradParameters = model:getParameters()
-print (parameter, gradParameter)
 
 -- Take all the five letters pretending that they form a word
 local input = torch.DoubleTensor{1,2,3,4,5}
@@ -33,12 +31,12 @@ grad_from_CRFCriterion = {gNode=gNode, gEdge=gEdge}
 function obj(x)
 	parameters:copy(x)
 	gradParameters:zero()
-	
+
 	output = model:forward(input)
-  local f = torch.dot(output.outNode, gNode) + torch.dot(output.wEdge, gEdge)
-  
-  -- estimate df/dW
-  model:backward(input, grad_from_CRFCriterion)
+	local f = torch.dot(output.outNode, gNode) + torch.dot(output.wEdge, gEdge)
+
+	-- estimate df/dW
+	model:backward(input, grad_from_CRFCriterion)	
 	return f, gradParameters
 end
 

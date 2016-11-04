@@ -2,15 +2,16 @@ require 'nn'
 require 'optim'   
 require 'ClassCRFCriterion'
 require 'LinearCRF'
-require 'SGD'
-require 'SAG_NUS'
+require 'sgd'
+require 'sag_nus'
 
 cmd = torch.CmdLine()
 cmd:option('-lambda',1e-3,'regularization parameter')
 cmd:option('-optim', 'LBFGS' ,'optimization method')
 cmd:option('-iter',50,'number of maximal iterations')
 cmd:option('-lr',1e-1,'learning rate')
-cmd:option('-b',1,'number of words in gradient update')
+cmd:option('-b',100,'number of words in gradient update')
+cmd:option('-n',100,'number of words used for training')
 -- parse input params
 params = cmd:parse(arg)
 -- print(params)
@@ -40,7 +41,7 @@ opt.learningRate = params.lr	-- fixed step size used in the line search of BFGS
 local train_fname = '../data/train_torch.dat'
 local test_fname = '../data/test_torch.dat'
 
-capWord = 100	-- only use the first 100 words. Otherwise it takes too long to train.
+capWord = params.n	-- only use the first 100 words. Otherwise it takes too long to train.
 -- uncomment the next line if you do not want to cap #words
 -- capWord = math.huge  
 
@@ -76,11 +77,14 @@ max_word_len = torch.max(torch.DoubleTensor{wLen:max(), twLen:max()})
 
 -- Cap the number of words used for training at capWord
 nWord = (#train.wLen)[1]
-if nWord > capWord then nWord = capWord  end
+-- if capWord < 0, train on all the words
+if capWord > 0 and nWord > capWord then nWord = capWord  end
 optimState.nWord = nWord
-optimState.fevalIntervel = math.ceil(nWord/3)	-- compute objective function after the number of updates
+optimState.fevalIntervel = params.b			-- compute objective function after the number of updates
 optimState.L = torch.ones(nWord)			-- Lipschitz constant for each training example
 optimState.sampleRecord = torch.zeros(nWord)			-- record of training example if it is sampled before
+optimState.backtrackingSkip = torch.zeros(nWord)			-- number of sampled word consecutively avoids backtracking
+optimState.lineSearchToSkip = torch.Tensor(nWord):fill(-1)			-- number of next samples that line search can be skipped
 
 print('==> training in progress with ' .. nWord .. ' words')
 
@@ -134,8 +138,7 @@ local function singleEval(x, idx)
 		return nil
 	end
     
-	-- evaluate function by enumerating all words
-		-- estimate f
+	-- estimate f
 	first = idx > 1 and cumwLen[idx-1]+1 or 1	--index of the first letter in the word
 	last = cumwLen[idx]											--index of the last letter in the word
 	local input = torch.linspace(first, last, last-first+1)	
@@ -148,8 +151,8 @@ local function singleEval(x, idx)
 	model:backward(input, df_do)		
 
 	-- gradients and f(X), add regularization
-	gradParameters:add(lambda*x)
-	f = f + lambda*torch.pow(x:norm(), 2)/2
+	-- gradParameters:add(lambda*x)
+	-- f = f + lambda*torch.pow(x:norm(), 2)/2
 
 	-- return df/dX
 	return f, gradParameters
@@ -258,48 +261,50 @@ end
 
 -- sample one training example uniformly and return its f and gradient
 local function uniformSample(x)
-	idx = math.random(nWord)
+	local idx = math.random(nWord)
 	-- print('sample ', idx)
 	return idx, singleEval(x, idx)
 end
 
+-- input:	x:	weight
+--			idx:	sample id
+--			Li: 	old Lipschitz constant
+--			fi:		objective function value without regulation term
+--			gi: 	gradient without regulation term
+-- output: 	Li: Lipschitz constant for each training example
 local function Llinesearch(x,idx,Li,fi,gi)
-     x_p = x:add(-1/Li, gi)
-     f_p,g_p = singleEval(x_p,idx)
-     f_p = f_p - lambda*torch.pow(x_p:norm(), 2)/2
-	 g_p:add(-lambda*x_p)
-     while f_p >= (fi - 1/2/Li*torch.pow(gi:norm(), 2)) do
-     	   Li = 2*Li
-     	   x_p = x:add(-1/Li, gi)
-           f_p,g_p = singleEval(x_p,idx)
-           f_p = f_p - lambda*torch.pow(x_p:norm(), 2)/2
-	       g_p:add(-lambda*x_p)
-     end
-     return Li
+    local x_p = torch.add(x, -1/Li, gi)
+    local f_p,g_p = singleEval(x_p,idx)
+    local g_norm = torch.pow(gi:norm(), 2)
+	--print('--------------------')
+	local count = 0
+    while f_p >= (fi - 1/2/Li*g_norm) do
+    	Li = 2*Li
+     	x_p:add(-1/Li, gi)
+        f_p,g_p = singleEval(x_p,idx)
+        -- print(idx, Li, f_p, fi, (fi - 1/2/Li*g_norm))
+    end
+    -- restore the old w parameter of the model
+    parameters:copy(x)
+    return Li
 end
 
 -- input x: w in CRF problem
---		 L: Lipschitz constant for each training example
 local function nonUniformSample(x, L)
-	randi = math.random()
+	local randi = math.random()
+	local rand_idx = 0
 	-- first time or half probability
 	if L:sum() == L:size(1) or randi > 0.5 then
 		rand_idx = math.random(nWord)
 	else
-		-- get the mean of L
-		p = torch.div(L, L:sum())
-		--print("new p", p)
+		-- get the weight of L
+		local p = torch.div(L, L:sum())
 		-- sample by weight
 		rand_idx = torch.multinomial(p,1,true)[1]
-		--print(rand_idx)
 	end
-	fi, gi = singleEval(x, rand_idx)
-
-	fi = fi - lambda*torch.pow(x:norm(), 2)/2
-	gi:add(-lambda*x)
-	--if torch.pow(gi:norm(),2) > 1e-8 then
-		--L[idx] = lineSearch(x,idx,L[idx],fi)
-	--end
+	
+	-- print(rand_idx)
+	local fi, gi = singleEval(x, rand_idx)
 	return rand_idx, fi, gi
 end
 
@@ -318,5 +323,4 @@ end
 -- Really start the optimization
  print('iter fn.val gap time feval.num train_lett_err train_word_err test_lett_err test_word_err')
  x,fx = optimMethod(feval, parameters, optimState)
-
 -- for i=1,#fx do print(i,fx[i]); end	-- secrete
